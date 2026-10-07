@@ -530,8 +530,11 @@ Panel {
     return ""
   }
 
-  function showDoorbell(name) {
-    popupCameraName = String(name || "")
+  function showDoorbell(cameraId) {
+    var name = ""
+    for (var i = 0; i < cameras.length; i++)
+      if (String(cameras[i].id) === String(cameraId)) name = String(cameras[i].name || "")
+    popupCameraName = name || String(doorbellCamera ? doorbellCamera.name || "" : "")
     popupAt = Date.now()
     liveNow = Date.now()
     popupVisible = true
@@ -597,7 +600,7 @@ Panel {
     function toggle(): void { root.toggle() }
     function next(): string { root.selectCamera(root.cameraIndex + 1); return "ok" }
     function showCamera(name: string): void { root.showCamera(name) }
-    function doorbell(name: string): void { root.showDoorbell(name) }
+    function doorbell(cameraId: string): void { root.showDoorbell(cameraId) }
     function debug(): string {
       return JSON.stringify({ status: root.statusState, cameras: root.cameras.length,
         events: (root.ring.events || []).length, updatedAt: root.ring.updatedAt || "" })

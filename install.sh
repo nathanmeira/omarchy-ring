@@ -31,7 +31,7 @@ npm_bin="$(dirname "$node_bin")/npm"
 [[ -n $npm_bin ]] || die "npm not found next to $node_bin"
 node_root="$(dirname "$(dirname "$node_bin")")"
 
-for cmd in ffmpeg systemd-run notify-send omarchy-shell; do
+for cmd in ffmpeg systemd-run omarchy-shell; do
   command -v "$cmd" >/dev/null || die "missing $cmd"
 done
 command -v pw-play >/dev/null || command -v mpv >/dev/null || echo "note: no pw-play or mpv, so the doorbell will be silent"
@@ -42,7 +42,7 @@ mkdir -p "$share" "$state" "$unit_dir" "$bin_dir"
 mkdir -p -m 700 "$config"
 mkdir -p "$config/sounds"
 
-install -m 644 "$here/service/omarchy-ring.mjs" "$here/service/login.mjs" \
+install -m 644 "$here/service/omarchy-ring.mjs" "$here/service/notify.mjs" "$here/service/login.mjs" \
   "$here/service/package.json" "$here/service/package-lock.json" "$here/service/.npmrc" "$share/"
 
 say "Installing ring-client-api (pinned, install scripts disabled)…"

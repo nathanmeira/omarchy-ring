@@ -11,6 +11,7 @@ import {
 } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { notify } from './notify.mjs'
 
 const home = homedir()
 const configDir = join(process.env.XDG_CONFIG_HOME || join(home, '.config'), 'omarchy-ring')
@@ -266,19 +267,12 @@ async function backfill(camera) {
 
 function notifyDesktop(title, body, url, urgent = false) {
   if (!config.desktopNotifications) return
-  const child = spawn('notify-send', [
-    '--app-name=Ring', '--icon=camera-web', '--urgency=' + (urgent ? 'critical' : 'normal'),
-    '--action=default=Open camera', '--wait', title, body,
-  ], {
-    stdio: ['ignore', 'pipe', 'ignore'],
-    timeout: 10 * 60 * 1000,
-  })
-  let out = ''
-  child.stdout.on('data', (d) => { out += d })
-  child.on('close', () => {
-    if (out.trim() === 'default') openUrl(url)
-  })
-  child.on('error', (e) => log('notify-send failed:', e.message))
+  notify({
+    appName: 'Ring', icon: 'camera-web', summary: title, body,
+    urgency: urgent ? 2 : 1,
+    actions: [['default', 'Open camera']],
+    onAction: (key) => { if (key === 'default') openUrl(url) },
+  }).catch((e) => log('Desktop notification failed:', e.message))
 }
 
 const BROWSERS = ['google-chrome-stable', 'chromium']
@@ -322,14 +316,15 @@ function playDoorbellSound() {
   else runInSession(['mpv', '--no-video', '--really-quiet', '--no-config', path])
 }
 
-function showDoorbellPopup(cameraName) {
-  runInSession(['omarchy-shell', 'nnathan.ring', 'doorbell', String(cameraName)])
+// Only the camera id goes on the command line; the widget looks up the name.
+function showDoorbellPopup(cameraId) {
+  runInSession(['omarchy-shell', 'nnathan.ring', 'doorbell', String(Number(cameraId) || 0)])
 }
 
 function onDoorbell(camera) {
   const current = settings()
   playDoorbellSound()
-  if (current.doorbellPopup) showDoorbellPopup(camera.name)
+  if (current.doorbellPopup) showDoorbellPopup(camera.id)
   if (Number(current.doorbellLiveSeconds) > 0) {
     startLive(camera, Number(current.doorbellLiveSeconds)).catch((e) => log('Live view failed:', e.message))
   }
@@ -524,7 +519,7 @@ async function simulate(cameraName, kind = 'motion') {
   notifyDesktop(name, event.text, camera ? camera.url : cameraUrl(name), kind === 'ding')
   if (kind === 'ding') {
     playDoorbellSound()
-    if (settings().doorbellPopup) showDoorbellPopup(name)
+    if (settings().doorbellPopup) showDoorbellPopup(camera ? camera.id : 0)
   }
   log(`Simulated ${kind} on ${name}. Click the notification within 15s to test opening the camera.`)
   setTimeout(() => process.exit(0), 15000)
