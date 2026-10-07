@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "nnathan.ring",
+  "name": "Ring",
+  "version": "1.0.0",
+  "author": "nnathan",
+  "license": "MIT",
+  "description": "Ring camera events with thumbnails, grouped per camera, in an Omarchy bar panel.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Ring",
+    "description": "Recent motion and doorbell events per camera, with snapshots and one-click live view.",
+    "category": "Home",
+    "aliases": ["ring", "doorbell", "cameras"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "eventsPerCamera": 30
+    },
+    "schema": [
+      { "key": "eventsPerCamera", "type": "integer", "label": "Events listed per camera", "min": 5, "max": 100, "step": 5, "defaultValue": 30 }
+    ]
+  }
+}

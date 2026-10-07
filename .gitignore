@@ -1,0 +1,8 @@
+node_modules/
+*.tmp
+
+# Editor and OS files; they can contain local paths
+.idea/
+.vscode/
+*.iml
+.DS_Store

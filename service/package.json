@@ -1,0 +1,9 @@
+{
+  "name": "omarchy-ring",
+  "private": true,
+  "type": "module",
+  "description": "Ring camera events for the nnathan.ring Omarchy bar widget",
+  "dependencies": {
+    "ring-client-api": "14.3.0"
+  }
+}
