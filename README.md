@@ -8,6 +8,16 @@ plays a chime without stealing your keyboard.
 > It talks to Ring through [ring-client-api](https://github.com/dgreif/ring), an
 > unofficial library that Ring can break at any time.
 
+![The Ring panel open from the bar](docs/screenshots/desktop.png)
+
+![The doorbell popup when someone rings](docs/screenshots/desktop-doorbell.png)
+
+<p>
+  <img src="docs/screenshots/panel.png" alt="The Ring panel: camera tabs, the latest snapshot, the last 7 days and recent events" width="32%">
+  <img src="docs/screenshots/settings.png" alt="Settings: doorbell sound, popup and live view length, browser, notifications" width="32%">
+  <img src="docs/screenshots/doorbell.png" alt="The doorbell popup with the camera picture" width="32%" valign="top">
+</p>
+
 ## What it does
 
 - **Bar icon** that lights up when something new happened. Left-click opens the

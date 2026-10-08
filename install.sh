@@ -80,6 +80,12 @@ if [[ -d $HOME/.config/omarchy/plugins/$plugin_id ]] && ! grep -q "\"$plugin_id\
   omarchy plugin enable "$plugin_id" >/dev/null 2>&1 && say "Widget added to the bar."
 fi
 
+# A running shell keeps the old panel's IPC handler across plugin reloads, so
+# the service would keep talking to the previous Panel.qml until a restart.
+if pgrep -x quickshell >/dev/null && command -v omarchy-restart-shell >/dev/null; then
+  omarchy-restart-shell >/dev/null 2>&1 && say "Shell restarted to load the new panel."
+fi
+
 cat <<EOF
 
 Next: log in to Ring (email, password, then the 2FA code):
