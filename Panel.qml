@@ -61,6 +61,7 @@ Panel {
   }
 
   function sendRequest(action, cameraId) {
+    if (!dirsPrivate) return
     requestFile.setText(JSON.stringify({ action: action, cameraId: cameraId, at: new Date().toISOString() }))
   }
 
@@ -85,7 +86,7 @@ Panel {
     for (var k in ringSettings) next[k] = ringSettings[k]
     next[key] = value
     ringSettings = next
-    settingsFile.setText(JSON.stringify(next, null, 2) + "\n")
+    if (dirsPrivate) settingsFile.setText(JSON.stringify(next, null, 2) + "\n")
   }
 
   readonly property string soundsDir: configDir + "/sounds"
@@ -143,7 +144,21 @@ Panel {
 
   function refreshServiceState() { if (!serviceProcess.running) serviceProcess.running = true }
 
-  Component.onCompleted: refreshSounds()
+  // Quickshell writes with the shell's umask (usually 022), so files like
+  // seen.json would come out world-readable. Make both directories private
+  // before writing anything to them.
+  property bool dirsPrivate: false
+
+  Process {
+    id: privateDirsProcess
+    command: ["install", "-d", "-m", "700", root.stateDir, root.configDir]
+    onExited: function(exitCode) { root.dirsPrivate = exitCode === 0 }
+  }
+
+  Component.onCompleted: {
+    privateDirsProcess.running = true
+    refreshSounds()
+  }
 
   function parseJson(content, fallback) {
     try {
@@ -252,7 +267,7 @@ Panel {
     var next = {}
     for (var i = 0; i < cameras.length; i++) next[String(cameras[i].name).toLowerCase()] = now
     root.seen = next
-    seenFile.setText(JSON.stringify(next, null, 2))
+    if (dirsPrivate) seenFile.setText(JSON.stringify(next, null, 2))
   }
 
   function firstUnreadCamera() {

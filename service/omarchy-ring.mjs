@@ -6,7 +6,7 @@ import { RingApi } from 'ring-client-api'
 import { enableDebug, useLogger } from 'ring-client-api/util'
 import { spawn } from 'node:child_process'
 import {
-  existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync,
+  chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync,
   unlinkSync, writeFileSync,
 } from 'node:fs'
 import { homedir } from 'node:os'
@@ -26,6 +26,17 @@ const settingsPath = join(configDir, 'settings.json')
 
 mkdirSync(snapshotDir, { recursive: true })
 mkdirSync(liveDir, { recursive: true })
+// The widget writes here too, under the shell's umask; a private directory
+// keeps those files unreadable to other users whatever their mode.
+chmodSync(stateDir, 0o700)
+
+// push-receiver sends the GCM token over TLS; install.sh patches it to verify
+// mtalk.google.com (see patch-push-receiver.mjs). Never run without that.
+const pushClient = readFileSync(new URL('./node_modules/@eneris/push-receiver/dist/client.js', import.meta.url), 'utf8')
+if (pushClient.includes('TLSSocket(null)') || !pushClient.includes('servername: HOST')) {
+  console.error('omarchy-ring: @eneris/push-receiver is unpatched; re-run install.sh')
+  process.exit(1)
+}
 
 const config = loadConfig()
 

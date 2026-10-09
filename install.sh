@@ -38,16 +38,24 @@ command -v pw-play >/dev/null || command -v mpv >/dev/null || echo "note: no pw-
 
 say "Using Node $("$node_bin" --version) at $node_bin"
 
-mkdir -p "$share" "$state" "$unit_dir" "$bin_dir"
-mkdir -p -m 700 "$config"
+mkdir -p "$share" "$unit_dir" "$bin_dir"
+# Camera names, events and snapshots live here. The widget writes under the
+# shell's umask, so the directories themselves must be private; also fixes
+# files left readable by earlier versions.
+mkdir -p -m 700 "$config" "$state"
 mkdir -p "$config/sounds"
+chmod 700 "$config" "$state"
+chmod -R go-rwx "$config" "$state"
 
 install -m 644 "$here/service/omarchy-ring.mjs" "$here/service/notify.mjs" "$here/service/login.mjs" \
+  "$here/service/patch-push-receiver.mjs" \
   "$here/service/package.json" "$here/service/package-lock.json" "$here/service/.npmrc" "$share/"
 
 say "Installing ring-client-api (pinned, install scripts disabled)…"
 # Exact versions from the lockfile, no package install scripts.
 (cd "$share" && "$npm_bin" ci --omit=dev --ignore-scripts --no-audit --no-fund --loglevel=error)
+# push-receiver 4.3.0 skips TLS certificate checks; see the script for details.
+"$node_bin" "$share/patch-push-receiver.mjs" "$share/node_modules" || die "could not patch @eneris/push-receiver"
 
 [[ -e $config/sounds/ding-dong.ogg ]] || install -m 644 "$here/service/sounds/ding-dong.ogg" "$config/sounds/"
 

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nnathan.ring",
   "name": "Ring",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "nnathan",
   "license": "MIT",
   "description": "Ring camera events with thumbnails, grouped per camera, in an Omarchy bar panel.",
